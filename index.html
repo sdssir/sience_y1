@@ -1,165 +1,814 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#7c3aed" />
-  <meta name="description" content="Science Year 1 interactive quiz with Medium and Hard levels for Topics 2 to 7." />
-  <title>Science Year 1 Challenge</title>
-  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
-  <link rel="stylesheet" href="assets/css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Quiz Challenge</title>
+<meta name="description" content="Science Year 1 interactive quiz, Topics 2 to 7, designed for big screens and TVs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg1:#0b1026; --bg2:#151b3b; --bg3:#1d2452;
+  --card:rgba(255,255,255,.07); --card-border:rgba(255,255,255,.14);
+  --text:#f5f7ff; --muted:#a9b1d6;
+  --accent:#7c5cff; --accent2:#22d3ee;
+  --ok:#22c55e; --ok-bg:rgba(34,197,94,.18);
+  --bad:#ef4444; --bad-bg:rgba(239,68,68,.18);
+  --gold:#fbbf24;
+  --t2:#f59e0b; --t3:#22c55e; --t4:#ec4899; --t5:#f97316; --t6:#10b981; --t7:#3b82f6;
+  --radius:1.4rem;
+  --shadow:0 1rem 3rem rgba(0,0,0,.45);
+}
+/* Base font scales with screen width: ~22px on 1080p, ~26px capped on 4K CSS px */
+html{font-size:clamp(14px,1.15vw,26px);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Fredoka','Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:radial-gradient(120vw 80vh at 10% 0%,#2a2f6b 0%,transparent 60%),
+             radial-gradient(90vw 70vh at 100% 100%,#0f4c5c 0%,transparent 60%),
+             linear-gradient(160deg,var(--bg1),var(--bg2) 60%,var(--bg3));
+  color:var(--text);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none;}
+button:focus{outline:none;}
+button:focus-visible,button.focused{outline:.28rem solid var(--gold);outline-offset:.25rem;}
+
+/* floating orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(60px);opacity:.35;pointer-events:none;z-index:0;animation:drift 18s ease-in-out infinite alternate;}
+.orb.a{width:40vw;height:40vw;background:#7c5cff;top:-15vw;left:-10vw;}
+.orb.b{width:35vw;height:35vw;background:#22d3ee;bottom:-15vw;right:-8vw;animation-delay:-9s;}
+.orb.c{width:22vw;height:22vw;background:#ec4899;top:40vh;left:60vw;animation-delay:-4s;}
+@keyframes drift{from{transform:translate(0,0) scale(1);}to{transform:translate(4vw,3vh) scale(1.12);}}
+
+#app{position:relative;z-index:1;height:100vh;height:100dvh;width:100vw;overflow:hidden;}
+.screen{position:absolute;inset:0;display:none;padding:2.2vh 3.5vw;flex-direction:column;}
+.screen.active{display:flex;animation:fadeIn .45s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(1.2rem);}to{opacity:1;transform:none;}}
+
+/* ============ START SCREEN ============ */
+#screen-start{justify-content:center;align-items:center;text-align:center;gap:2.2vh;}
+.brand{display:flex;flex-direction:column;align-items:center;gap:.4rem;}
+.brand .kicker{font-size:1.1rem;letter-spacing:.35em;text-transform:uppercase;color:var(--accent2);font-weight:600;}
+.brand h1{font-size:3.6rem;line-height:1.05;font-weight:700;
+  background:linear-gradient(90deg,#fff,#c7d2fe 40%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.brand p{font-size:1.25rem;color:var(--muted);max-width:60vw;}
+.topic-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;width:min(92vw,90rem);}
+.topic-card{
+  position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;
+  background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:1.2rem 1.3rem;min-height:9.5rem;text-align:left;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+  box-shadow:0 .4rem 1.5rem rgba(0,0,0,.25);
+  overflow:hidden;
+}
+.topic-card::after{content:"";position:absolute;inset:auto -30% -60% auto;width:70%;height:120%;background:var(--tc);opacity:.18;border-radius:50%;filter:blur(30px);}
+.topic-card:hover,.topic-card:focus-visible,.topic-card.focused{transform:translateY(-.35rem) scale(1.02);background:rgba(255,255,255,.12);box-shadow:var(--shadow);}
+.topic-card .icon{font-size:2.4rem;line-height:1;}
+.topic-card .num{font-size:.9rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-weight:600;}
+.topic-card .name{font-size:1.35rem;font-weight:600;line-height:1.15;}
+.topic-card .count{font-size:.95rem;color:var(--muted);margin-top:auto;}
+.topic-card.all{grid-column:span 1;background:linear-gradient(135deg,rgba(124,92,255,.45),rgba(34,211,238,.35));border-color:rgba(255,255,255,.3);}
+.topic-card.all .name{font-size:1.7rem;}
+.hint{font-size:1rem;color:var(--muted);display:flex;gap:1.6rem;flex-wrap:wrap;justify-content:center;}
+kbd{display:inline-block;font-family:inherit;font-size:.9em;padding:.1em .55em;border-radius:.45em;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-bottom-width:.2em;margin:0 .1em;}
+
+/* ============ QUIZ SCREEN ============ */
+#screen-quiz{display:none;grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:1.6vh;}
+#screen-quiz.active{display:grid;}
+.quiz-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+.badge{display:inline-flex;align-items:center;gap:.6rem;background:var(--card);border:1px solid var(--card-border);border-radius:999px;padding:.45rem 1.1rem .45rem .6rem;font-size:1.1rem;font-weight:600;}
+.badge .dot{width:1.6rem;height:1.6rem;border-radius:50%;background:var(--tc);display:grid;place-items:center;font-size:1rem;}
+.stats{display:flex;gap:.8rem;align-items:center;}
+.stat{background:var(--card);border:1px solid var(--card-border);border-radius:999px;padding:.45rem 1.1rem;font-size:1.05rem;font-weight:600;display:flex;gap:.5rem;align-items:center;}
+.stat b{color:var(--gold);}
+.stat .streak{color:#fb923c;}
+.progress{height:.7rem;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;}
+.progress .bar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease;}
+
+.qcard{
+  display:flex;flex-direction:column;justify-content:center;gap:.8rem;
+  background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:1.6rem 2.4rem;box-shadow:0 .5rem 2rem rgba(0,0,0,.25);
+  position:relative;overflow:hidden;
+}
+.qcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:.55rem;background:var(--tc);}
+.qcard .qnum{font-size:1rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;font-weight:600;}
+.qcard .qtext{font-size:2.15rem;line-height:1.25;font-weight:600;}
+
+.options{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.1rem;min-height:0;}
+.opt{
+  display:flex;align-items:center;gap:1.1rem;text-align:left;
+  background:var(--card);border:2px solid var(--card-border);border-radius:var(--radius);
+  padding:1rem 1.4rem;font-size:1.5rem;font-weight:500;line-height:1.2;
+  transition:transform .15s ease,background .15s ease,border-color .15s ease;
+  min-height:5.6rem;
+}
+.opt .key{
+  flex:0 0 auto;width:3.1rem;height:3.1rem;border-radius:1rem;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),#a78bfa);font-weight:700;font-size:1.5rem;
+  box-shadow:0 .25rem .8rem rgba(124,92,255,.5);
+}
+.opt:not(:disabled):hover,.opt:focus-visible,.opt.focused{transform:translateY(-.2rem) scale(1.015);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.4);}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok);animation:pop .4s ease;}
+.opt.correct .key{background:var(--ok);box-shadow:0 .25rem .8rem rgba(34,197,94,.55);}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);animation:shake .45s ease;}
+.opt.wrong .key{background:var(--bad);box-shadow:0 .25rem .8rem rgba(239,68,68,.55);}
+.opt.dim{opacity:.45;}
+.opt:disabled{cursor:default;}
+@keyframes pop{0%{transform:scale(1);}40%{transform:scale(1.05);}100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-.6rem);}40%{transform:translateX(.6rem);}60%{transform:translateX(-.4rem);}80%{transform:translateX(.4rem);}}
+
+.bottom{
+  min-height:9.2rem;display:flex;align-items:center;gap:1.4rem;
+  background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:1rem 1.6rem;transition:background .3s ease,border-color .3s ease;
+}
+.bottom.ok{background:var(--ok-bg);border-color:rgba(34,197,94,.5);}
+.bottom.bad{background:var(--bad-bg);border-color:rgba(239,68,68,.5);}
+.bottom .fb-icon{font-size:3.4rem;line-height:1;flex:0 0 auto;width:4rem;text-align:center;}
+.bottom .fb-text{flex:1 1 auto;min-width:0;}
+.bottom .fb-title{font-size:1.6rem;font-weight:700;margin-bottom:.2rem;}
+.bottom.ok .fb-title{color:#86efac;}
+.bottom.bad .fb-title{color:#fca5a5;}
+.bottom .fb-exp{font-size:1.2rem;color:#e2e8f0;line-height:1.35;}
+.bottom .fb-wait{font-size:1.25rem;color:var(--muted);}
+.btn{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:.6rem;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-weight:700;font-size:1.35rem;border-radius:999px;padding:.95rem 2rem;
+  box-shadow:0 .5rem 1.5rem rgba(124,92,255,.45);
+  transition:transform .15s ease,filter .15s ease;
+}
+.btn:hover,.btn:focus-visible,.btn.focused{transform:translateY(-.2rem) scale(1.04);filter:brightness(1.1);}
+.btn.ghost{background:rgba(255,255,255,.1);border:1px solid var(--card-border);box-shadow:none;}
+.btn.small{font-size:1.05rem;padding:.6rem 1.3rem;}
+.hidden{display:none !important;}
+
+/* ============ RESULT SCREEN ============ */
+#screen-result{display:none;grid-template-columns:1fr 1.35fr;grid-template-rows:auto minmax(0,1fr) auto;gap:1.4rem 2.4rem;}
+#screen-result.active{display:grid;}
+.res-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;}
+.res-head h2{font-size:2.4rem;font-weight:700;}
+.res-head p{font-size:1.2rem;color:var(--muted);}
+.res-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.5rem;min-height:0;}
+.ring{position:relative;width:16rem;height:16rem;}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.ring circle{fill:none;stroke-width:1.4rem;stroke-linecap:round;}
+.ring .track{stroke:rgba(255,255,255,.1);}
+.ring .fill{stroke:url(#grad);stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1);}
+.ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring .val b{font-size:3.6rem;font-weight:700;line-height:1;}
+.ring .val span{font-size:1.05rem;color:var(--muted);}
+.res-msg{font-size:1.5rem;font-weight:600;text-align:center;}
+.res-sub{font-size:1.1rem;color:var(--muted);text-align:center;}
+.res-right{display:flex;flex-direction:column;gap:1rem;min-height:0;}
+.panel{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.2rem 1.5rem;min-height:0;}
+.panel h3{font-size:1.15rem;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.8rem;font-weight:600;}
+.tlist{display:flex;flex-direction:column;gap:.45rem;}
+.trow{display:grid;grid-template-columns:2rem 15rem 1fr 4.5rem;align-items:center;gap:.8rem;font-size:1.05rem;}
+.trow .tbar{height:.75rem;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;}
+.trow .tbar i{display:block;height:100%;border-radius:999px;background:var(--tc);width:0;transition:width .9s ease;}
+.trow .tname{font-weight:600;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trow .tscore{text-align:right;font-weight:700;color:var(--gold);}
+.trow .ticon{font-size:1.4rem;text-align:center;}
+.res-right{overflow:hidden;}
+.res-right .panel:first-child{flex:0 1 auto;overflow:auto;}
+.review{flex:1 1 0;min-height:0;overflow:auto;scrollbar-width:thin;}
+.review ul{list-style:none;display:flex;flex-direction:column;gap:.7rem;}
+.review li{background:rgba(0,0,0,.2);border-left:.4rem solid var(--bad);border-radius:.8rem;padding:.7rem 1rem;font-size:1.05rem;line-height:1.3;}
+.review li b{color:#86efac;}
+.review .none{color:#86efac;font-size:1.2rem;font-weight:600;}
+.res-actions{grid-column:1/-1;display:flex;justify-content:center;gap:1.2rem;}
+
+/* ============ CONFETTI ============ */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50;}
+
+/* ============ RESPONSIVE (phone / tablet fallback) ============ */
+@media (max-width:900px){
+  html{font-size:15px;}
+  body{overflow:auto;}
+  #app{height:auto;min-height:100vh;}
+  .screen{position:relative;min-height:100vh;padding:1.2rem 1rem;}
+  .topic-grid{grid-template-columns:1fr 1fr;width:100%;}
+  .topic-card.all{grid-column:span 1;}
+  .brand h1{font-size:2.3rem;}
+  .brand p{max-width:100%;font-size:1rem;}
+  .options{grid-template-columns:1fr;grid-template-rows:none;}
+  .opt{font-size:1.15rem;min-height:4.2rem;padding:.8rem 1rem;}
+  .qcard .qtext{font-size:1.45rem;}
+  .bottom{flex-direction:column;align-items:stretch;text-align:center;}
+  .bottom .fb-icon{width:auto;}
+  .btn{justify-content:center;}
+  .stats .stat.streak-stat{display:none;}
+  #screen-result.active{display:flex;flex-direction:column;}
+  .ring{width:11rem;height:11rem;}
+  .review{max-height:22rem;}
+  .trow{grid-template-columns:2rem 1fr 4rem;}
+  .trow .tbar{grid-column:2/4;}
+  .hint{display:none;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important;}
+}
+</style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <button id="brandHome" class="brand" type="button" aria-label="Go to home screen">
-        <img src="assets/images/brothers-photo.png" alt="Quiz buddies" class="brand-photo" />
-        <span class="brand-copy">
-          <strong>Science Year 1</strong>
-          <small>Topics 2–7</small>
-        </span>
-      </button>
-      <div id="topScore" class="top-score" hidden>
-        <span>MARKS</span>
-        <strong><span id="liveScore">0</span>/<span id="liveTotal">40</span></strong>
+<div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+<canvas id="confetti"></canvas>
+
+<div id="app">
+
+  <!-- ================= START ================= -->
+  <section id="screen-start" class="screen active" aria-label="Start">
+    <div class="brand">
+      <div class="kicker">Science · Year 1 · Topics 2 – 7</div>
+      <h1>Science Quiz Challenge</h1>
+      <p>Pick a topic, answer the questions, and learn from every answer. Good luck, Ziyad!</p>
+    </div>
+    <div class="topic-grid" id="topic-grid"></div>
+    <div class="hint">
+      <span><kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> answer</span>
+      <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move</span>
+      <span><kbd>Enter</kbd> select / next</span>
+      <span><kbd>Esc</kbd> home</span>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="screen-quiz" class="screen" aria-label="Quiz">
+    <div class="quiz-top">
+      <div class="badge" id="q-badge"><span class="dot" id="q-dot"></span><span id="q-topic"></span></div>
+      <div class="stats">
+        <div class="stat"><span>Question</span><b id="q-count">1 / 10</b></div>
+        <div class="stat"><span>Score</span><b id="q-score">0</b></div>
+        <div class="stat streak-stat"><span class="streak">🔥</span><b id="q-streak">0</b></div>
+        <button class="btn ghost small" id="btn-quit" type="button">Home</button>
       </div>
-    </header>
+    </div>
+    <div class="progress"><div class="bar" id="q-bar"></div></div>
+    <div class="qcard">
+      <div class="qnum" id="q-num">Question 1</div>
+      <div class="qtext" id="q-text"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="bottom" id="bottom">
+      <div class="fb-icon" id="fb-icon">🤔</div>
+      <div class="fb-text">
+        <div class="fb-title hidden" id="fb-title"></div>
+        <div class="fb-exp hidden" id="fb-exp"></div>
+        <div class="fb-wait" id="fb-wait">Choose your answer: A, B, C or D</div>
+      </div>
+      <button class="btn hidden" id="btn-next" type="button">Next <span>➜</span></button>
+    </div>
+  </section>
 
-    <main class="main-area">
-      <section id="homeScreen" class="screen home-screen" aria-labelledby="homeTitle">
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="eyebrow">LEARN • THINK • SCORE</span>
-            <h1 id="homeTitle">Science Quiz Adventure</h1>
-            <p>Choose a level and answer 40 questions. Every answer gets instant feedback and a short explanation.</p>
-            <div class="hero-badges">
-              <span>⚡ Instant answer</span>
-              <span>🧠 Thinking questions</span>
-              <span>🏆 Total marks</span>
-              <span>🖼️ Picture questions</span>
-            </div>
-          </div>
-          <div class="hero-visual" aria-hidden="true">
-            <div class="orbit orbit-a">🔬</div>
-            <div class="orbit orbit-b">🌱</div>
-            <div class="orbit orbit-c">🧲</div>
-            <img src="assets/images/correct-happy.png" alt="" />
-          </div>
-        </div>
+  <!-- ================= RESULT ================= -->
+  <section id="screen-result" class="screen" aria-label="Result">
+    <div class="res-head">
+      <div>
+        <h2 id="res-title">Quiz Complete!</h2>
+        <p id="res-topic"></p>
+      </div>
+      <div class="badge"><span class="dot" style="--tc:#fbbf24">🏆</span><span id="res-quick"></span></div>
+    </div>
+    <div class="res-left">
+      <div class="ring">
+        <svg viewBox="0 0 100 100">
+          <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+          <circle class="track" cx="50" cy="50" r="42"></circle>
+          <circle class="fill" id="ring-fill" cx="50" cy="50" r="42" pathLength="1"></circle>
+        </svg>
+        <div class="val"><b id="res-pct">0%</b><span id="res-frac">0 / 0 correct</span></div>
+      </div>
+      <div class="res-msg" id="res-msg"></div>
+      <div class="res-sub" id="res-sub"></div>
+    </div>
+    <div class="res-right">
+      <div class="panel"><h3>Marks by topic</h3><div class="tlist" id="res-topics"></div></div>
+      <div class="panel review"><h3>Let's review</h3><div id="res-review"></div></div>
+    </div>
+    <div class="res-actions">
+      <button class="btn" id="btn-retry" type="button">🔁 Try again</button>
+      <button class="btn ghost" id="btn-home" type="button">🏠 Choose another topic</button>
+    </div>
+  </section>
 
-        <div class="level-grid" role="group" aria-label="Choose quiz level">
-          <button class="level-card selected" data-level="MEDIUM" type="button">
-            <span class="level-icon">🚀</span>
-            <span class="level-name">MEDIUM</span>
-            <span class="level-desc">40 questions</span>
-            <span class="level-detail">More thinking, comparison, and simple situations.</span>
-          </button>
-          <button class="level-card hard" data-level="HARD" type="button">
-            <span class="level-icon">🔥</span>
-            <span class="level-name">HARD</span>
-            <span class="level-desc">40 questions</span>
-            <span class="level-detail">Reasoning, two-clue questions, and trickier scenarios.</span>
-          </button>
-        </div>
+</div>
 
-        <div class="home-bottom">
-          <label class="name-field">
-            <span>Student name <small>(optional)</small></span>
-            <input id="studentName" type="text" maxlength="30" placeholder="Type your name" autocomplete="name" />
-          </label>
-          <div class="start-summary">
-            <div>
-              <span id="selectedLevelLabel">MEDIUM LEVEL</span>
-              <strong>40 questions • 40 marks</strong>
-            </div>
-            <button id="startButton" class="primary-button" type="button">Start Adventure →</button>
-          </div>
-        </div>
-      </section>
+<script>
+(function(){
+'use strict';
 
-      <section id="quizScreen" class="screen quiz-screen" hidden aria-labelledby="questionText">
-        <div class="quiz-toolbar">
-          <button id="quitButton" class="icon-button" type="button" title="Back to levels">←</button>
-          <div class="question-meta">
-            <span id="levelBadge" class="level-badge">MEDIUM</span>
-            <span id="topicLabel" class="topic-label">Topic</span>
-          </div>
-          <div class="question-count">Question <strong id="questionNumber">1</strong> / <strong id="questionTotal">40</strong></div>
-        </div>
+/* ================= DATA ================= */
+var TOPICS = {
+  2:{name:'Science Room Rules',      icon:'🧪', color:'#f59e0b'},
+  3:{name:'Living & Non-living Things', icon:'🐸', color:'#22c55e'},
+  4:{name:'Humans & Our Senses',     icon:'👀', color:'#ec4899'},
+  5:{name:'Animals',                 icon:'🦁', color:'#f97316'},
+  6:{name:'Plants',                  icon:'🌱', color:'#10b981'},
+  7:{name:'Magnets',                 icon:'🧲', color:'#3b82f6'}
+};
 
-        <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+/* t = topic, q = question, o = options (correct is o[a]), e = simple explanation */
+var QUESTIONS = [
+  /* ---------- TOPIC 2: Science Room Rules ---------- */
+  {t:2,q:'What should we do before entering the Science Room?',
+   o:['Run inside quickly','Line up nicely','Shout to our friends','Eat a snack first'],a:1,
+   e:'We must line up (beratur) before entering the Science Room. This keeps everyone safe and orderly.'},
+  {t:2,q:'Before entering the Science Room, we must ask permission from the…',
+   o:['teacher','canteen worker','school guard','bus driver'],a:0,
+   e:'We ask the teacher for permission first. This is a good habit and keeps us safe.'},
+  {t:2,q:'Which of these is NOT allowed in the Science Room?',
+   o:['Listening to the teacher','Lining up quietly','Eating and drinking','Cleaning the table'],a:2,
+   e:'Eating and drinking are not allowed in the Science Room. Food can be spoiled by chemicals and can make a mess.'},
+  {t:2,q:'What must we do before leaving the Science Room?',
+   o:['Clean and tidy the room','Turn on all the taps','Leave rubbish on the table','Hide the equipment'],a:0,
+   e:'Always clean and tidy (bersihkan dan kemaskan) the Science Room before leaving.'},
+  {t:2,q:'What will happen if rubbish is thrown into the sink?',
+   o:['The sink becomes cleaner','The sink gets blocked','The sink becomes bigger','The water becomes sweet'],a:1,
+   e:'Rubbish blocks the sink (singki tersumbat). Always throw rubbish into the dustbin.'},
+  {t:2,q:'Playing and running in the Science Room can…',
+   o:['make us cleverer','make us stronger','make us taller','cause injury'],a:3,
+   e:'Playing, joking or running in the Science Room can hurt you or your friends.'},
+  {t:2,q:'If we follow the Science Room rules, the room becomes…',
+   o:['dirty and dangerous','noisy and messy','clean, tidy and safe','dark and cold'],a:2,
+   e:'Following the rules keeps the Science Room clean, tidy and safe for everyone.'},
+  {t:2,q:'If we do NOT follow the Science Room rules, the room becomes…',
+   o:['cleaner','dirty and dangerous','more beautiful','safer'],a:1,
+   e:'Breaking the rules makes the Science Room dirty and dangerous (kotor dan bahaya).'},
+  {t:2,q:'Ali is joking and playing near the tables in the Science Room. Is this right?',
+   o:['Yes, it is fun','Yes, if the teacher is away','No, he could get hurt','No, only running is banned'],a:2,
+   e:'Joking, playing and running are all not allowed because someone could get injured.'},
+  {t:2,q:'Following the Science Room rules helps our learning to be…',
+   o:['carried out well','boring','very slow','impossible'],a:0,
+   e:'When everyone follows the rules, lessons can be carried out well (berkesan).'},
+  {t:2,q:'Which pupil is following the Science Room rules?',
+   o:['Aina drinks juice at her table','Ben lines up quietly before entering','Chan runs to his seat','Dina throws paper into the sink'],a:1,
+   e:'Ben is lining up quietly. The others are eating, running or throwing rubbish into the sink, which are all against the rules.'},
 
-        <div class="quiz-stage">
-          <section class="question-pane">
-            <div class="question-kicker">Choose the best answer</div>
-            <h2 id="questionText"></h2>
-            <figure id="questionImageWrap" class="question-image-wrap" hidden>
-              <img id="questionImage" src="" alt="" />
-            </figure>
-            <div class="tip-line">💡 Think carefully before you choose.</div>
-          </section>
+  /* ---------- TOPIC 3: Living & Non-living ---------- */
+  {t:3,q:'Which of these is a living thing?',
+   o:['Robot','Car','Tree','Stone'],a:2,
+   e:'A tree breathes, needs water, grows and reproduces, so it is a living thing (benda hidup).'},
+  {t:3,q:'Which of these is a NON-living thing?',
+   o:['Cat','Bird','Human','Doll'],a:3,
+   e:'A doll (anak patung) does not breathe, eat, grow or reproduce, so it is non-living.'},
+  {t:3,q:'All living things…',
+   o:['breathe','are made of plastic','never grow','cannot move'],a:0,
+   e:'Living things breathe, need water and food, move, reproduce and grow.'},
+  {t:3,q:'Which is NOT a characteristic of living things?',
+   o:['Breathes','Reproduces','Grows','Is made in a factory'],a:3,
+   e:'Living things are not made in factories. They breathe, eat, move, grow and reproduce.'},
+  {t:3,q:'A bird and an aeroplane can both fly. Why is the bird a living thing but the aeroplane is not?',
+   o:['The bird is smaller','The bird breathes, eats, grows and reproduces','The aeroplane is faster','The aeroplane is bigger'],a:1,
+   e:'Both can move, but only the bird breathes, needs food and water, grows and reproduces.'},
+  {t:3,q:'Egg ➜ chick ➜ adult chicken. Which characteristic of living things is this?',
+   o:['Moving','Breathing','Growing','Sleeping'],a:2,
+   e:'The chicken changes from an egg to a chick to an adult. This shows that living things grow (membesar).'},
+  {t:3,q:'Which order is from SMALLEST to BIGGEST?',
+   o:['Elephant, gaur, deer, wild cat, mouse','Mouse, wild cat, deer, gaur, elephant','Mouse, deer, wild cat, elephant, gaur','Wild cat, mouse, deer, gaur, elephant'],a:1,
+   e:'Mouse is the smallest, then wild cat, deer, gaur (seladang) and elephant is the biggest.'},
+  {t:3,q:'What are the basic needs of living things?',
+   o:['Food, water and air','Toys, TV and games','Money, cars and houses','Books, pens and paper'],a:0,
+   e:'Living things need food, water and air (makanan, air dan udara) to stay alive.'},
+  {t:3,q:'Why do humans and animals need food?',
+   o:['To look nice','To get energy and grow','To swim faster','To sleep better'],a:1,
+   e:'Food gives humans and animals energy and helps them grow.'},
+  {t:3,q:'How do plants get their food?',
+   o:['They eat insects','They buy food at the shop','They make their own food','They drink milk'],a:2,
+   e:'Plants make their own food using sunlight, water and air.'},
+  {t:3,q:'Why do humans and animals need shelter?',
+   o:['To make food','To play games','To breathe','To protect themselves from rain, heat and danger'],a:3,
+   e:'Shelter (tempat perlindungan) protects humans and animals from rain, heat and danger.'},
 
-          <section class="answer-pane">
-            <div id="answers" class="answers" role="group" aria-label="Answer choices"></div>
+  /* ---------- TOPIC 4: Humans & Senses ---------- */
+  {t:4,q:'Which body part is used for the sense of sight?',
+   o:['Ear','Eye','Nose','Tongue'],a:1,
+   e:'We see with our eyes. The eyes give us the sense of sight (penglihatan).'},
+  {t:4,q:'We hear sounds with our…',
+   o:['ears','eyes','skin','tongue'],a:0,
+   e:'Ears give us the sense of hearing (pendengaran).'},
+  {t:4,q:'Which sense do we use with our nose?',
+   o:['Sight','Taste','Smell','Touch'],a:2,
+   e:'The nose gives us the sense of smell (bau).'},
+  {t:4,q:'Which body part is used to taste sweet, sour, salty and bitter?',
+   o:['Skin','Nose','Ear','Tongue'],a:3,
+   e:'The tongue gives us the sense of taste (rasa).'},
+  {t:4,q:'Rough, smooth, soft and hard. Which sense tells us this?',
+   o:['Touch, using our skin','Hearing, using our ears','Smell, using our nose','Sight, using our eyes'],a:0,
+   e:'Our skin gives us the sense of touch (sentuhan). It feels rough, smooth, soft and hard.'},
+  {t:4,q:'How many senses do humans have?',
+   o:['Three','Four','Five','Six'],a:2,
+   e:'Humans have five senses: sight, hearing, smell, taste and touch.'},
+  {t:4,q:'Ciku and apple are sweet. Orange and kedondong are sour. Which fruits are SOUR?',
+   o:['Ciku and apple','Orange and kedondong','Apple and orange','Ciku and kedondong'],a:1,
+   e:'We use our tongue to taste. Orange and kedondong taste sour (masam).'},
+  {t:4,q:'To know the colour, size and shape of an object we use our…',
+   o:['ears','tongue','nose','eyes'],a:3,
+   e:'Eyes let us see colour, size and shape.'},
+  {t:4,q:'The lights go off and Linda cannot see. Which sense helps her find the torchlight?',
+   o:['Sight','Touch','Taste','Smell'],a:1,
+   e:'When it is dark, Linda can still feel objects with her skin, using the sense of touch.'},
+  {t:4,q:'Amir cannot read clearly. Which tool can help him?',
+   o:['Hearing aid','Spectacles (glasses)','Magnet','Torchlight'],a:1,
+   e:'Spectacles (cermin mata) help the eyes see clearly.'},
+  {t:4,q:'A hearing aid helps a person whose ___ is not working well.',
+   o:['sense of hearing','sense of taste','sense of smell','sense of sight'],a:0,
+   e:'A hearing aid (alat bantu pendengaran) helps the sense of hearing.'},
 
-            <div id="feedback" class="feedback-panel" hidden aria-live="polite">
-              <img id="feedbackIcon" class="feedback-avatar" src="" alt="" />
-              <div class="feedback-content">
-                <div class="feedback-head">
-                  <strong id="feedbackTitle"></strong>
-                  <span id="answerMark"></span>
-                </div>
-                <p id="selectedFeedback"></p>
-                <div class="correct-answer-line"><span>Correct answer:</span> <strong id="correctAnswerText"></strong></div>
-                <p id="feedbackExplanation" class="explanation"></p>
-              </div>
-            </div>
+  /* ---------- TOPIC 5: Animals ---------- */
+  {t:5,q:'Which animal has a shell?',
+   o:['Snail','Horse','Bird','Goat'],a:0,
+   e:'A snail has a shell (cangkerang). Turtles also have shells.'},
+  {t:5,q:'Which body part helps a bird to fly?',
+   o:['Tail','Wings','Shell','Horns'],a:1,
+   e:'Wings (kepak) help birds and butterflies to fly.'},
+  {t:5,q:'A fish uses its ___ to swim.',
+   o:['fins','legs','wings','horns'],a:0,
+   e:'Fins (sirip) help a fish to swim. Its tail helps it steer.'},
+  {t:5,q:'A crocodile has ___ to protect itself.',
+   o:['soft fur','feathers','hard scaly skin','antennae'],a:2,
+   e:'The crocodile’s hard skin (kulit keras) protects it from danger.'},
+  {t:5,q:'A duck has ___ to help it swim.',
+   o:['horns','a shell','antennae','webbed feet'],a:3,
+   e:'Webbed feet (kaki selaput renang) help ducks and frogs to swim.'},
+  {t:5,q:'Which animal has a horn (sumbu) on its nose?',
+   o:['Cat','Rhinoceros','Snail','Fish'],a:1,
+   e:'A rhinoceros (badak sumbu) has a horn on its nose to protect itself.'},
+  {t:5,q:'What are a buffalo’s horns used for?',
+   o:['Flying','Swimming','Protecting itself','Making sounds'],a:2,
+   e:'Horns (tanduk) help animals like buffaloes and goats to defend themselves.'},
+  {t:5,q:'Which animal has antennae (feelers)?',
+   o:['Butterfly','Horse','Fish','Turtle'],a:0,
+   e:'Butterflies and dragonflies have antennae (sesungut) on their heads.'},
+  {t:5,q:'A bird uses its ___ to pick up food.',
+   o:['fin','beak','shell','scales'],a:1,
+   e:'Birds have a beak (paruh) to pick up and eat food.'},
+  {t:5,q:'Cows, cats, hamsters and rabbits all have the same body part. What is it?',
+   o:['Feathers','Scales','Fur','Shells'],a:2,
+   e:'They all have fur (bulu halus). Different animals can have similar body parts.'},
+  {t:5,q:'Which animal has scales?',
+   o:['Rabbit','Fish','Cow','Butterfly'],a:1,
+   e:'A fish has scales (sisik) covering its body.'},
 
-            <div class="action-row">
-              <span id="answerPrompt">Select A, B, C, or D.</span>
-              <button id="nextButton" class="primary-button next-button" type="button" disabled>Next →</button>
-            </div>
-          </section>
-        </div>
-      </section>
+  /* ---------- TOPIC 6: Plants ---------- */
+  {t:6,q:'Which is NOT a part of a plant?',
+   o:['Leaf','Root','Wing','Stem'],a:2,
+   e:'The parts of a plant are flower, leaf, stem and root. Wings belong to animals.'},
+  {t:6,q:'Which part of the plant makes food?',
+   o:['Leaf','Root','Flower','Stem'],a:0,
+   e:'The leaf (daun) makes food for the plant using sunlight.'},
+  {t:6,q:'Which part absorbs water and nutrients from the soil?',
+   o:['Flower','Leaf','Stem','Root'],a:3,
+   e:'The root (akar) absorbs water and nutrients from the soil. It also supports the plant.'},
+  {t:6,q:'Which part carries food from the leaves to the other parts of the plant?',
+   o:['Stem','Flower','Root','Seed'],a:0,
+   e:'The stem (batang) carries food from the leaves, and water and nutrients from the roots.'},
+  {t:6,q:'The flower will change into…',
+   o:['roots','fruit and seeds','leaves','a stem'],a:1,
+   e:'The flower (bunga) is for reproduction. It turns into fruit and seeds (buah dan biji benih).'},
+  {t:6,q:'Without roots, a plant will…',
+   o:['grow taller','turn red','fall down','fly away'],a:2,
+   e:'Roots hold the plant in the soil and support it. Without roots the plant will fall down.'},
+  {t:6,q:'Which plant has a WOODY stem?',
+   o:['Durian tree','Papaya tree','Balsam (keembung)','Pandan'],a:0,
+   e:'A durian tree has a woody stem (batang berkayu). A papaya tree has a non-woody stem.'},
+  {t:6,q:'Which plant does NOT have flowers?',
+   o:['Hibiscus','Rose','Lotus','Fern (paku pakis)'],a:3,
+   e:'A fern does not have flowers. Hibiscus, rose and lotus are flowering plants.'},
+  {t:6,q:'Pandan leaves have ___ veins.',
+   o:['parallel','network','no','curly'],a:0,
+   e:'Pandan has parallel leaf veins (urat daun selari). Rose has network veins (urat daun jejala).'},
+  {t:6,q:'Which plant has fibrous roots (akar serabut)?',
+   o:['Rose','Pandan','Hibiscus','Durian'],a:1,
+   e:'Pandan has fibrous roots. Rose and hibiscus have a tap root (akar tunjang).'},
+  {t:6,q:'Hibiscus and rose are different plants but they both have…',
+   o:['flowers, network veins, woody stems and tap roots','no flowers','parallel veins','fibrous roots'],a:0,
+   e:'Different plants can share the same features. Both have flowers, network veins, woody stems and tap roots.'},
 
-      <section id="resultScreen" class="screen result-screen" hidden aria-labelledby="resultTitle">
-        <div class="result-hero">
-          <img id="resultAvatar" src="assets/images/correct-happy.png" alt="Happy quiz buddies" />
-          <div>
-            <span class="eyebrow">QUIZ COMPLETE</span>
-            <h1 id="resultTitle">Great job!</h1>
-            <p id="resultMessage"></p>
-          </div>
-        </div>
+  /* ---------- TOPIC 7: Magnets ---------- */
+  {t:7,q:'Why does a fridge door close tightly?',
+   o:['It has glue','It has a magnet','It is very heavy','It has a key'],a:1,
+   e:'There is a magnet on the fridge door. Magnets are useful in our daily lives.'},
+  {t:7,q:'Which of these is NOT a shape of magnet?',
+   o:['Bar magnet','Horseshoe magnet','Triangle magnet','Ring magnet'],a:2,
+   e:'Magnet shapes are bar, cylinder, U-shape, horseshoe, button and ring. There is no triangle magnet.'},
+  {t:7,q:'Which object can a magnet attract?',
+   o:['Pencil','Eraser','Plastic ruler','Nail'],a:3,
+   e:'A magnet can attract a nail, pins, screws and paper clips. It cannot attract wood, plastic or rubber.'},
+  {t:7,q:'Which object CANNOT be attracted by a magnet?',
+   o:['Safety pin','Screw','Ice cream stick','Metal bottle cap'],a:2,
+   e:'An ice cream stick is made of wood, so a magnet cannot attract it.'},
+  {t:7,q:'Every magnet has two poles. They are…',
+   o:['East and West','North and South','Up and Down','Left and Right'],a:1,
+   e:'Every magnet has a North pole and a South pole (kutub Utara dan kutub Selatan).'},
+  {t:7,q:'When two SAME poles are brought close, the magnets will…',
+   o:['attract','melt','break','repel (push away)'],a:3,
+   e:'Same poles repel (menolak). North pushes North away, and South pushes South away.'},
+  {t:7,q:'When a North pole and a South pole are brought close, the magnets will…',
+   o:['attract','repel','spin','float'],a:0,
+   e:'Different poles attract (menarik). North and South pull towards each other.'},
+  {t:7,q:'Paper clips are mixed with powder in a plate. What is the easiest way to pick out the paper clips?',
+   o:['Pour in water','Use a magnet','Blow on the plate','Shake the plate'],a:1,
+   e:'A magnet attracts the paper clips but not the powder, so it separates them easily.'},
+  {t:7,q:'Magnet A attracts 5 paper clips. Magnet B attracts 2 paper clips. Which magnet is stronger?',
+   o:['Magnet A','Magnet B','Both are the same','Neither one'],a:0,
+   e:'A stronger magnet attracts more paper clips. Every magnet has a different strength.'},
+  {t:7,q:'Which tool can hold a screw so that it does not fall?',
+   o:['A plastic spoon','A wooden ruler','A magnetic screwdriver','A rubber band'],a:2,
+   e:'A magnetic screwdriver has a magnet at its tip that holds the screw.'},
+  {t:7,q:'Can a magnet attract ALL objects?',
+   o:['Yes, every object','No, only some objects','Only paper','Only wooden objects'],a:1,
+   e:'A magnet can attract objects, but not all objects can be attracted by a magnet.'}
+];
 
-        <div class="score-grid">
-          <article class="score-card main-score"><span>Total Marks</span><strong><span id="finalScore">0</span>/40</strong></article>
-          <article class="score-card"><span>Percentage</span><strong id="finalPercent">0%</strong></article>
-          <article class="score-card"><span>Correct</span><strong id="correctCount">0</strong></article>
-          <article class="score-card"><span>Need Review</span><strong id="wrongCount">0</strong></article>
-        </div>
+/* ================= HELPERS ================= */
+function $(id){return document.getElementById(id);}
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function countByTopic(t){var n=0;for(var i=0;i<QUESTIONS.length;i++){if(QUESTIONS[i].t===t)n++;}return n;}
+var LETTERS=['A','B','C','D'];
 
-        <section class="breakdown-section">
-          <div class="section-title-row"><h2>Marks by Topic</h2><span id="resultLevel"></span></div>
-          <div id="topicBreakdown" class="topic-breakdown"></div>
-        </section>
+/* simple sounds (safe on TVs without audio support) */
+var audioCtx=null;
+function beep(type){
+  try{
+    if(!audioCtx){audioCtx=new (window.AudioContext||window.webkitAudioContext)();}
+    var now=audioCtx.currentTime;
+    var notes=type==='ok'?[523.25,659.25,783.99]:[220,180];
+    for(var i=0;i<notes.length;i++){
+      var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type=type==='ok'?'triangle':'sawtooth';o.frequency.value=notes[i];
+      g.gain.setValueAtTime(0.0001,now+i*0.12);
+      g.gain.exponentialRampToValueAtTime(0.18,now+i*0.12+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+i*0.12+0.22);
+      o.connect(g);g.connect(audioCtx.destination);
+      o.start(now+i*0.12);o.stop(now+i*0.12+0.25);
+    }
+  }catch(e){}
+}
 
-        <details class="review-box">
-          <summary>Review questions that need another try <span id="reviewCount"></span></summary>
-          <div id="reviewList" class="review-list"></div>
-        </details>
+/* confetti */
+var canvas=$('confetti'),ctx=canvas.getContext('2d'),pieces=[],confRunning=false;
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+window.addEventListener('resize',resizeCanvas);resizeCanvas();
+function confetti(amount,big){
+  var colors=['#7c5cff','#22d3ee','#fbbf24','#22c55e','#ec4899','#f97316','#ffffff'];
+  for(var i=0;i<amount;i++){
+    pieces.push({x:big?Math.random()*canvas.width:canvas.width/2+(Math.random()-0.5)*canvas.width*0.5,
+      y:big?-Math.random()*canvas.height*0.8-20:canvas.height*0.55,
+      vx:(Math.random()-0.5)*(big?6:18),vy:big?Math.random()*3+2:-(Math.random()*14+6),
+      w:8+Math.random()*8,h:5+Math.random()*6,rot:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.3,
+      c:colors[Math.floor(Math.random()*colors.length)],life:big?220:110});
+  }
+  if(!confRunning){confRunning=true;requestAnimationFrame(tick);}
+}
+function tick(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(var i=pieces.length-1;i>=0;i--){
+    var p=pieces[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.35;p.vx*=0.99;p.rot+=p.vr;p.life--;
+    if(p.life<=0||p.y>canvas.height+30){pieces.splice(i,1);continue;}
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.globalAlpha=Math.min(1,p.life/30);
+    ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();
+  }
+  if(pieces.length){requestAnimationFrame(tick);}else{confRunning=false;ctx.clearRect(0,0,canvas.width,canvas.height);}
+}
 
-        <div class="result-actions">
-          <button id="retryButton" class="primary-button" type="button">Try Same Level Again</button>
-          <button id="changeLevelButton" class="secondary-button" type="button">Choose Level</button>
-          <button id="printButton" class="ghost-button" type="button">Print Result</button>
-        </div>
-      </section>
-    </main>
-  </div>
+/* ================= STATE ================= */
+var state={mode:null,list:[],idx:0,score:0,streak:0,best:0,answers:[],answered:false};
 
-  <script src="assets/js/questions.js"></script>
-  <script src="assets/js/app.js"></script>
+function showScreen(id){
+  var s=document.querySelectorAll('.screen');
+  for(var i=0;i<s.length;i++){s[i].classList.remove('active');}
+  $(id).classList.add('active');
+  focusIndex=-1;
+}
+
+/* ================= START SCREEN ================= */
+function buildStart(){
+  var grid=$('topic-grid'),html='';
+  html+='<button class="topic-card all" type="button" data-topic="quick" style="--tc:#7c5cff"><span class="icon">⚡</span><span class="num">Quick mix · Topics 2 – 7</span><span class="name">Quick Challenge</span><span class="count">20 random questions</span></button>';
+  html+='<button class="topic-card all" type="button" data-topic="all" style="--tc:#22d3ee"><span class="icon">🚀</span><span class="num">Full mix · Topics 2 – 7</span><span class="name">Full Challenge</span><span class="count">All '+QUESTIONS.length+' questions · shuffled</span></button>';
+  for(var t=2;t<=7;t++){
+    var tp=TOPICS[t];
+    html+='<button class="topic-card" type="button" data-topic="'+t+'" style="--tc:'+tp.color+'"><span class="icon">'+tp.icon+'</span><span class="num">Topic '+t+'</span><span class="name">'+tp.name+'</span><span class="count">'+countByTopic(t)+' questions</span></button>';
+  }
+  grid.innerHTML=html;
+  var cards=grid.querySelectorAll('.topic-card');
+  for(var i=0;i<cards.length;i++){
+    cards[i].addEventListener('click',function(){startQuiz(this.getAttribute('data-topic'));});
+  }
+}
+
+/* ================= QUIZ ================= */
+function startQuiz(mode){
+  state.mode=mode;
+  var pool=[];
+  for(var i=0;i<QUESTIONS.length;i++){
+    if(mode==='all'||mode==='quick'||QUESTIONS[i].t===parseInt(mode,10)){pool.push(QUESTIONS[i]);}
+  }
+  pool=shuffle(pool);
+  if(mode==='quick'){pool=pool.slice(0,20).sort(function(a,b){return a.t-b.t;});}
+  state.list=pool.map(function(q){
+    var order=shuffle([0,1,2,3]);
+    return {src:q,opts:order.map(function(k){return q.o[k];}),correct:order.indexOf(q.a)};
+  });
+  state.idx=0;state.score=0;state.streak=0;state.best=0;state.answers=[];
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  var item=state.list[state.idx],q=item.src,tp=TOPICS[q.t];
+  state.answered=false;
+  document.querySelector('#screen-quiz').style.setProperty('--tc',tp.color);
+  $('q-dot').textContent=tp.icon;
+  $('q-topic').textContent='Topic '+q.t+' · '+tp.name;
+  $('q-count').textContent=(state.idx+1)+' / '+state.list.length;
+  $('q-score').textContent=state.score;
+  $('q-streak').textContent=state.streak;
+  $('q-bar').style.width=((state.idx)/state.list.length*100)+'%';
+  $('q-num').textContent='Question '+(state.idx+1);
+  $('q-text').textContent=q.q;
+
+  var html='';
+  for(var i=0;i<4;i++){
+    html+='<button class="opt" type="button" data-i="'+i+'"><span class="key">'+LETTERS[i]+'</span><span class="txt">'+item.opts[i]+'</span></button>';
+  }
+  $('options').innerHTML=html;
+  var opts=$('options').querySelectorAll('.opt');
+  for(var k=0;k<opts.length;k++){opts[k].addEventListener('click',function(){answer(parseInt(this.getAttribute('data-i'),10));});}
+
+  var bottom=$('bottom');bottom.className='bottom';
+  $('fb-icon').textContent='🤔';
+  $('fb-title').classList.add('hidden');$('fb-exp').classList.add('hidden');
+  $('fb-wait').classList.remove('hidden');
+  $('btn-next').classList.add('hidden');
+  $('btn-next').innerHTML=(state.idx===state.list.length-1?'See results <span>🏁</span>':'Next <span>➜</span>');
+  focusIndex=-1;
+  setFocus(0);
+}
+
+function answer(i){
+  if(state.answered)return;
+  state.answered=true;
+  var item=state.list[state.idx],ok=(i===item.correct);
+  var opts=$('options').querySelectorAll('.opt');
+  for(var k=0;k<opts.length;k++){
+    opts[k].disabled=true;opts[k].classList.remove('focused');
+    if(k===item.correct)opts[k].classList.add('correct');
+    else if(k===i)opts[k].classList.add('wrong');
+    else opts[k].classList.add('dim');
+  }
+  if(ok){state.score++;state.streak++;if(state.streak>state.best)state.best=state.streak;}
+  else{state.streak=0;}
+  state.answers.push({q:item.src,chosen:item.opts[i],correct:item.opts[item.correct],ok:ok});
+
+  var bottom=$('bottom');bottom.className='bottom '+(ok?'ok':'bad');
+  var cheers=['Excellent!','Great job!','Correct!','Well done!','Superb!','You got it!'];
+  $('fb-icon').textContent=ok?'🎉':'💡';
+  $('fb-title').textContent=ok?cheers[Math.floor(Math.random()*cheers.length)]+(state.streak>=3?' 🔥 '+state.streak+' in a row!':''):'Not quite. The answer is '+LETTERS[item.correct]+'.';
+  $('fb-exp').textContent=item.src.e;
+  $('fb-title').classList.remove('hidden');$('fb-exp').classList.remove('hidden');
+  $('fb-wait').classList.add('hidden');
+  $('btn-next').classList.remove('hidden');
+  $('q-score').textContent=state.score;$('q-streak').textContent=state.streak;
+  $('q-bar').style.width=((state.idx+1)/state.list.length*100)+'%';
+  beep(ok?'ok':'bad');
+  if(ok)confetti(70,false);
+  focusIndex=-1;
+  setTimeout(function(){$('btn-next').focus();$('btn-next').classList.add('focused');},50);
+}
+
+function next(){
+  if(!state.answered)return;
+  if(state.idx<state.list.length-1){state.idx++;renderQuestion();}
+  else{showResult();}
+}
+
+/* ================= RESULT ================= */
+function showResult(){
+  var total=state.list.length,score=state.score,pct=Math.round(score/total*100);
+  showScreen('screen-result');
+  $('res-topic').textContent=state.mode==='all'?'Full Challenge · Topics 2 – 7':state.mode==='quick'?'Quick Challenge · Topics 2 – 7':'Topic '+state.mode+' · '+TOPICS[parseInt(state.mode,10)].name;
+  $('res-quick').textContent='Best streak: '+state.best;
+  $('res-pct').textContent=pct+'%';
+  $('res-frac').textContent=score+' / '+total+' correct';
+  var msg,sub;
+  if(pct===100){msg='PERFECT SCORE! 🌟';sub='You are a Science superstar!';}
+  else if(pct>=80){msg='Amazing work! 🏆';sub='Almost perfect. Keep it up!';}
+  else if(pct>=60){msg='Good job! 👍';sub='Review the questions below and try again.';}
+  else if(pct>=40){msg='Nice try! 💪';sub='Practise a little more and you will get there.';}
+  else{msg='Keep going! 🌱';sub='Read the explanations below and try again.';}
+  $('res-msg').textContent=msg;$('res-sub').textContent=sub;
+  var fill=$('ring-fill');fill.style.strokeDashoffset=1;
+  setTimeout(function(){fill.style.strokeDashoffset=1-score/total;},80);
+
+  /* by topic */
+  var per={},i;
+  for(i=0;i<state.answers.length;i++){var t=state.answers[i].q.t;if(!per[t])per[t]={ok:0,n:0};per[t].n++;if(state.answers[i].ok)per[t].ok++;}
+  var html='';
+  for(var t2=2;t2<=7;t2++){
+    if(!per[t2])continue;
+    var p=per[t2],tp=TOPICS[t2];
+    html+='<div class="trow" style="--tc:'+tp.color+'"><span class="ticon">'+tp.icon+'</span><span class="tname">Topic '+t2+' · '+tp.name+'</span><span class="tbar"><i data-w="'+(p.ok/p.n*100)+'"></i></span><span class="tscore">'+p.ok+' / '+p.n+'</span></div>';
+  }
+  $('res-topics').innerHTML=html;
+  setTimeout(function(){var bars=$('res-topics').querySelectorAll('i');for(var b=0;b<bars.length;b++){bars[b].style.width=bars[b].getAttribute('data-w')+'%';}},100);
+
+  /* review */
+  var wrong=[];for(i=0;i<state.answers.length;i++){if(!state.answers[i].ok)wrong.push(state.answers[i]);}
+  if(!wrong.length){$('res-review').innerHTML='<div class="none">🎯 No mistakes! You answered everything correctly.</div>';}
+  else{
+    var r='<ul>';
+    for(i=0;i<wrong.length;i++){r+='<li>'+wrong[i].q.q+'<br>You chose: <s>'+wrong[i].chosen+'</s> · Correct: <b>'+wrong[i].correct+'</b></li>';}
+    $('res-review').innerHTML=r+'</ul>';
+  }
+  if(pct>=80){confetti(220,true);}
+  setTimeout(function(){setFocus(0);},120);
+}
+
+/* ================= KEYBOARD / TV REMOTE ================= */
+var focusIndex=-1;
+function focusables(){
+  var active=document.querySelector('.screen.active');
+  if(!active)return [];
+  var all=active.querySelectorAll('button:not(:disabled):not(.hidden)'),out=[];
+  for(var i=0;i<all.length;i++){if(all[i].offsetParent!==null)out.push(all[i]);}
+  /* quiz screen: options first, then Next, then Home, so D-pad / Enter never lands on Home by default */
+  if(active.id==='screen-quiz'){
+    out.sort(function(a,b){return rank(a)-rank(b);});
+  }
+  return out;
+}
+function rank(el){
+  if(el.classList.contains('opt'))return parseInt(el.getAttribute('data-i'),10);
+  if(el.id==='btn-next')return 10;
+  return 20;
+}
+function clearFocused(){var f=document.querySelectorAll('.focused');for(var i=0;i<f.length;i++){f[i].classList.remove('focused');}}
+function setFocus(n){
+  var els=focusables();if(!els.length)return;
+  focusIndex=Math.max(0,Math.min(els.length-1,n));
+  clearFocused();els[focusIndex].classList.add('focused');els[focusIndex].focus();
+}
+function moveFocus(dir){
+  var els=focusables();if(!els.length)return;
+  var cur=els.indexOf(document.activeElement);if(cur<0)cur=focusIndex;
+  var active=document.querySelector('.screen.active').id;
+  var step=1;
+  if(active==='screen-quiz'&&!state.answered&&els[cur]&&els[cur].classList.contains('opt')){
+    if(dir==='up'||dir==='down')step=2;
+  }else if(active==='screen-start'){
+    if(dir==='up'||dir==='down')step=4;
+  }
+  var n=cur;
+  if(dir==='left'||dir==='up')n=cur-step;else n=cur+step;
+  if(n<0)n=0;if(n>els.length-1)n=els.length-1;
+  setFocus(n);
+}
+document.addEventListener('keydown',function(e){
+  var key=e.key,active=document.querySelector('.screen.active').id;
+  var kc=e.keyCode;
+  /* LG webOS remote sends standard arrow/Enter codes; Back = 461 */
+  if(kc===461||key==='Escape'){e.preventDefault();showScreen('screen-start');setFocus(0);return;}
+  if(key==='ArrowLeft'){e.preventDefault();moveFocus('left');return;}
+  if(key==='ArrowRight'){e.preventDefault();if(active==='screen-quiz'&&state.answered){next();}else{moveFocus('right');}return;}
+  if(active==='screen-result'&&(key==='ArrowUp'||key==='ArrowDown')){
+    e.preventDefault();var rv=document.querySelector('.review');rv.scrollTop+=(key==='ArrowDown'?1:-1)*rv.clientHeight*0.6;return;
+  }
+  if(key==='ArrowUp'){e.preventDefault();moveFocus('up');return;}
+  if(key==='ArrowDown'){e.preventDefault();moveFocus('down');return;}
+  if(active==='screen-quiz'){
+    var k=key.toUpperCase(),map={'A':0,'B':1,'C':2,'D':3,'1':0,'2':1,'3':2,'4':3};
+    if(!state.answered&&map.hasOwnProperty(k)){e.preventDefault();answer(map[k]);return;}
+    if(state.answered&&(key==='Enter'||key===' ')&&document.activeElement!==$('btn-quit')){e.preventDefault();next();return;}
+  }
+  if(key==='Enter'||key===' '){
+    var el=document.activeElement;
+    if(el&&el.tagName==='BUTTON'){return;} /* native click */
+    var els=focusables();if(els[focusIndex]){e.preventDefault();els[focusIndex].click();}
+  }
+});
+/* keep .focused in sync with mouse hover on TV magic remote */
+document.addEventListener('mouseover',function(e){
+  var b=e.target.closest?e.target.closest('button'):null;
+  if(b&&!b.disabled){clearFocused();b.classList.add('focused');var els=focusables();focusIndex=els.indexOf(b);}
+});
+
+/* ================= WIRE UP ================= */
+$('btn-next').addEventListener('click',next);
+$('btn-quit').addEventListener('click',function(){showScreen('screen-start');setFocus(0);});
+$('btn-home').addEventListener('click',function(){showScreen('screen-start');setFocus(0);});
+$('btn-retry').addEventListener('click',function(){startQuiz(state.mode);});
+buildStart();
+setFocus(0);
+})();
+</script>
 </body>
 </html>
