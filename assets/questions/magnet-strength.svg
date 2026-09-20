@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360">
+  <rect width="760" height="360" rx="28" fill="#ecfeff"/>
+  <text x="380" y="40" text-anchor="middle" font-size="28" font-family="Arial" font-weight="700" fill="#155e75">MAGNET STRENGTH TEST</text>
+  <g font-family="Arial" fill="#155e75">
+    <text x="120" y="90" font-size="24" font-weight="700">Magnet A</text><text x="120" y="230" font-size="24" font-weight="700">Magnet B</text>
+    <text x="610" y="90" font-size="20">clip moves at 8 cm</text><text x="610" y="230" font-size="20">clip moves at 4 cm</text>
+  </g>
+  <g>
+    <rect x="140" y="110" width="110" height="55" rx="9" fill="#ef4444"/><rect x="250" y="110" width="110" height="55" rx="9" fill="#3b82f6"/><text x="195" y="146" font-family="Arial" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">N</text><text x="305" y="146" font-family="Arial" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">S</text>
+    <rect x="140" y="250" width="110" height="55" rx="9" fill="#ef4444"/><rect x="250" y="250" width="110" height="55" rx="9" fill="#3b82f6"/><text x="195" y="286" font-family="Arial" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">N</text><text x="305" y="286" font-family="Arial" font-size="25" font-weight="700" fill="#fff" text-anchor="middle">S</text>
+  </g>
+  <g stroke="#94a3b8" stroke-width="4"><line x1="390" y1="138" x2="570" y2="138"/><line x1="390" y1="278" x2="500" y2="278"/></g>
+  <g fill="#334155"><path d="M575 122h20a10 10 0 0 1 0 20h-20a10 10 0 0 1 0-20zm-6 5h-12v10h12"/><path d="M505 262h20a10 10 0 0 1 0 20h-20a10 10 0 0 1 0-20zm-6 5h-12v10h12"/></g>
+</svg>

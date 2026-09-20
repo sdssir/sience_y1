@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360">
+  <rect width="760" height="360" rx="28" fill="#f0fdf4"/>
+  <text x="380" y="40" text-anchor="middle" font-size="28" font-family="Arial" font-weight="700" fill="#14532d">PLANT PARTS</text>
+  <line x1="380" y1="250" x2="380" y2="105" stroke="#22c55e" stroke-width="18" stroke-linecap="round"/>
+  <ellipse cx="320" cy="170" rx="62" ry="26" fill="#4ade80" transform="rotate(-22 320 170)"/>
+  <ellipse cx="445" cy="145" rx="62" ry="26" fill="#4ade80" transform="rotate(22 445 145)"/>
+  <g transform="translate(380 85)"><circle cx="0" cy="0" r="24" fill="#facc15"/><circle cx="0" cy="-34" r="25" fill="#fb7185"/><circle cx="32" cy="-10" r="25" fill="#fb7185"/><circle cx="20" cy="28" r="25" fill="#fb7185"/><circle cx="-20" cy="28" r="25" fill="#fb7185"/><circle cx="-32" cy="-10" r="25" fill="#fb7185"/></g>
+  <path d="M380 247c-22 25-48 35-70 62m70-62c22 25 48 35 70 62m-70-62c0 36-6 62-5 82" stroke="#a16207" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <rect x="160" y="300" width="440" height="28" rx="14" fill="#a16207" opacity=".25"/>
+  <g font-family="Arial" font-size="22" font-weight="700" fill="#14532d"><text x="470" y="92">flower</text><text x="505" y="156">leaf</text><text x="405" y="225">stem</text><text x="470" y="292">roots</text></g>
+</svg>

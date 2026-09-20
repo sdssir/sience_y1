@@ -2,153 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#2563eb" />
-  <meta name="description" content="Interactive Science Year 1 quiz for Topics 2 to 7." />
-  <title>Science Year 1 Quiz | Topics 2–7</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="description" content="Science Year 1 interactive quiz with Medium and Hard levels for Topics 2 to 7." />
+  <title>Science Year 1 Challenge</title>
   <link rel="icon" type="image/png" href="assets/images/favicon.png" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <div class="page-shell">
+  <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Science Year 1 Quiz home">
-        <span class="brand-mark" aria-hidden="true">🔬</span>
-        <span>
+      <button id="brandHome" class="brand" type="button" aria-label="Go to home screen">
+        <img src="assets/images/brothers-photo.png" alt="Quiz buddies" class="brand-photo" />
+        <span class="brand-copy">
           <strong>Science Year 1</strong>
           <small>Topics 2–7</small>
         </span>
-      </a>
-      <div class="score-chip" id="headerScore" hidden>
-        <span>Marks</span>
-        <strong><span id="liveScore">0</span>/<span id="liveTotal">0</span></strong>
+      </button>
+      <div id="topScore" class="top-score" hidden>
+        <span>MARKS</span>
+        <strong><span id="liveScore">0</span>/<span id="liveTotal">40</span></strong>
       </div>
     </header>
 
-    <main>
+    <main class="main-area">
       <section id="homeScreen" class="screen home-screen" aria-labelledby="homeTitle">
-        <div class="hero-card">
+        <div class="hero">
           <div class="hero-copy">
-            <span class="eyebrow">KSSR • English • Auto-marking</span>
+            <span class="eyebrow">LEARN • THINK • SCORE</span>
             <h1 id="homeTitle">Science Quiz Adventure</h1>
-            <p class="lead">Choose a topic, answer one question at a time, and see the correct answer immediately.</p>
-            <div class="feature-row" aria-label="Quiz features">
-              <span>✓ Instant answer</span>
-              <span>✓ 1 mark each</span>
-              <span>✓ Total marks</span>
+            <p>Choose a level and answer 40 questions. Every answer gets instant feedback and a short explanation.</p>
+            <div class="hero-badges">
+              <span>⚡ Instant answer</span>
+              <span>🧠 Thinking questions</span>
+              <span>🏆 Total marks</span>
+              <span>🖼️ Picture questions</span>
             </div>
           </div>
-          <img class="hero-avatar" src="assets/images/correct-smile.png" alt="Smiling student cartoon avatar" />
-        </div>
-
-        <div class="setup-grid">
-          <section class="panel">
-            <h2>1. Student</h2>
-            <label class="field-label" for="studentName">Name (optional)</label>
-            <input id="studentName" class="text-input" type="text" maxlength="30" placeholder="Enter your name" autocomplete="name" />
-            <p class="helper">Your name and best score stay only in this browser.</p>
-          </section>
-
-          <section class="panel topic-panel">
-            <div class="panel-heading-row">
-              <h2>2. Choose a quiz</h2>
-              <span class="best-score" id="bestScoreHome">Best: —</span>
-            </div>
-            <div id="topicCards" class="topic-grid" role="group" aria-label="Choose quiz topic"></div>
-          </section>
-        </div>
-
-        <div class="start-row">
-          <div>
-            <strong id="selectionTitle">All Topics</strong>
-            <span id="selectionMeta">36 questions • 36 total marks</span>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="orbit orbit-a">🔬</div>
+            <div class="orbit orbit-b">🌱</div>
+            <div class="orbit orbit-c">🧲</div>
+            <img src="assets/images/correct-happy.png" alt="" />
           </div>
-          <button id="startButton" class="primary-button" type="button">Start Quiz →</button>
+        </div>
+
+        <div class="level-grid" role="group" aria-label="Choose quiz level">
+          <button class="level-card selected" data-level="MEDIUM" type="button">
+            <span class="level-icon">🚀</span>
+            <span class="level-name">MEDIUM</span>
+            <span class="level-desc">40 questions</span>
+            <span class="level-detail">More thinking, comparison, and simple situations.</span>
+          </button>
+          <button class="level-card hard" data-level="HARD" type="button">
+            <span class="level-icon">🔥</span>
+            <span class="level-name">HARD</span>
+            <span class="level-desc">40 questions</span>
+            <span class="level-detail">Reasoning, two-clue questions, and trickier scenarios.</span>
+          </button>
+        </div>
+
+        <div class="home-bottom">
+          <label class="name-field">
+            <span>Student name <small>(optional)</small></span>
+            <input id="studentName" type="text" maxlength="30" placeholder="Type your name" autocomplete="name" />
+          </label>
+          <div class="start-summary">
+            <div>
+              <span id="selectedLevelLabel">MEDIUM LEVEL</span>
+              <strong>40 questions • 40 marks</strong>
+            </div>
+            <button id="startButton" class="primary-button" type="button">Start Adventure →</button>
+          </div>
         </div>
       </section>
 
       <section id="quizScreen" class="screen quiz-screen" hidden aria-labelledby="questionText">
         <div class="quiz-toolbar">
-          <button id="quitButton" class="ghost-button" type="button">← Topics</button>
-          <div class="progress-copy">
-            <span id="topicLabel">Topic</span>
-            <strong>Question <span id="questionNumber">1</span> of <span id="questionTotal">1</span></strong>
+          <button id="quitButton" class="icon-button" type="button" title="Back to levels">←</button>
+          <div class="question-meta">
+            <span id="levelBadge" class="level-badge">MEDIUM</span>
+            <span id="topicLabel" class="topic-label">Topic</span>
           </div>
-          <span class="mini-mark"><span id="miniScore">0</span> marks</span>
+          <div class="question-count">Question <strong id="questionNumber">1</strong> / <strong id="questionTotal">40</strong></div>
         </div>
 
-        <div class="progress-track" aria-hidden="true">
-          <div id="progressBar" class="progress-bar"></div>
-        </div>
+        <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
 
-        <article class="question-card">
-          <p class="question-kicker" id="questionKicker">Choose one answer</p>
-          <h2 id="questionText"></h2>
-          <div id="answers" class="answers" role="group" aria-label="Answer choices"></div>
+        <div class="quiz-stage">
+          <section class="question-pane">
+            <div class="question-kicker">Choose the best answer</div>
+            <h2 id="questionText"></h2>
+            <figure id="questionImageWrap" class="question-image-wrap" hidden>
+              <img id="questionImage" src="" alt="" />
+            </figure>
+            <div class="tip-line">💡 Think carefully before you choose.</div>
+          </section>
 
-          <div id="feedback" class="feedback" aria-live="polite" hidden>
-            <img id="feedbackIcon" class="feedback-icon" src="" alt="" />
-            <div class="feedback-copy">
-              <strong id="feedbackTitle"></strong>
-              <p id="feedbackAnswer"></p>
-              <p id="feedbackExplanation" class="feedback-explanation"></p>
+          <section class="answer-pane">
+            <div id="answers" class="answers" role="group" aria-label="Answer choices"></div>
+
+            <div id="feedback" class="feedback-panel" hidden aria-live="polite">
+              <img id="feedbackIcon" class="feedback-avatar" src="" alt="" />
+              <div class="feedback-content">
+                <div class="feedback-head">
+                  <strong id="feedbackTitle"></strong>
+                  <span id="answerMark"></span>
+                </div>
+                <p id="selectedFeedback"></p>
+                <div class="correct-answer-line"><span>Correct answer:</span> <strong id="correctAnswerText"></strong></div>
+                <p id="feedbackExplanation" class="explanation"></p>
+              </div>
             </div>
-          </div>
 
-          <div class="question-actions">
-            <span id="answerPrompt" class="answer-prompt">Select an answer to continue.</span>
-            <button id="nextButton" class="primary-button" type="button" hidden>Next Question →</button>
-          </div>
-        </article>
+            <div class="action-row">
+              <span id="answerPrompt">Select A, B, C, or D.</span>
+              <button id="nextButton" class="primary-button next-button" type="button" disabled>Next →</button>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section id="resultScreen" class="screen result-screen" hidden aria-labelledby="resultTitle">
-        <article class="result-card">
-          <img class="result-avatar" src="assets/images/correct-smile.png" alt="Smiling student cartoon avatar" />
-          <span class="eyebrow">Quiz complete</span>
-          <h1 id="resultTitle">Well done!</h1>
-          <p id="resultMessage" class="lead"></p>
-
-          <div class="score-board">
-            <div>
-              <span>Total Marks</span>
-              <strong><span id="finalScore">0</span>/<span id="finalTotal">0</span></strong>
-            </div>
-            <div>
-              <span>Percentage</span>
-              <strong id="finalPercent">0%</strong>
-            </div>
-            <div>
-              <span>Best Score</span>
-              <strong id="bestScoreResult">—</strong>
-            </div>
+        <div class="result-hero">
+          <img id="resultAvatar" src="assets/images/correct-happy.png" alt="Happy quiz buddies" />
+          <div>
+            <span class="eyebrow">QUIZ COMPLETE</span>
+            <h1 id="resultTitle">Great job!</h1>
+            <p id="resultMessage"></p>
           </div>
+        </div>
 
-          <section class="result-section" id="topicBreakdownSection">
-            <h2>Marks by Topic</h2>
-            <div id="topicBreakdown" class="breakdown-grid"></div>
-          </section>
+        <div class="score-grid">
+          <article class="score-card main-score"><span>Total Marks</span><strong><span id="finalScore">0</span>/40</strong></article>
+          <article class="score-card"><span>Percentage</span><strong id="finalPercent">0%</strong></article>
+          <article class="score-card"><span>Correct</span><strong id="correctCount">0</strong></article>
+          <article class="score-card"><span>Need Review</span><strong id="wrongCount">0</strong></article>
+        </div>
 
-          <section class="result-section" id="reviewSection">
-            <div class="section-heading-row">
-              <h2>Review</h2>
-              <span id="reviewCount"></span>
-            </div>
-            <div id="reviewList" class="review-list"></div>
-          </section>
+        <section class="breakdown-section">
+          <div class="section-title-row"><h2>Marks by Topic</h2><span id="resultLevel"></span></div>
+          <div id="topicBreakdown" class="topic-breakdown"></div>
+        </section>
 
-          <div class="result-actions">
-            <button id="retryButton" class="primary-button" type="button">Try Again</button>
-            <button id="homeButton" class="secondary-button" type="button">Choose Topic</button>
-            <button id="printButton" class="ghost-button" type="button">Print Result</button>
-          </div>
-        </article>
+        <details class="review-box">
+          <summary>Review questions that need another try <span id="reviewCount"></span></summary>
+          <div id="reviewList" class="review-list"></div>
+        </details>
+
+        <div class="result-actions">
+          <button id="retryButton" class="primary-button" type="button">Try Same Level Again</button>
+          <button id="changeLevelButton" class="secondary-button" type="button">Choose Level</button>
+          <button id="printButton" class="ghost-button" type="button">Print Result</button>
+        </div>
       </section>
     </main>
-
-    <footer>
-      <p>Science Year 1 • Topics 2–7 • Questions adapted from the supplied KSSR Science Year 1 textbook.</p>
-    </footer>
   </div>
 
   <script src="assets/js/questions.js"></script>

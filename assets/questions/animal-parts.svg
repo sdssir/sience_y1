@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360">
+  <rect width="760" height="360" rx="28" fill="#eff6ff"/>
+  <text x="380" y="42" text-anchor="middle" font-size="28" font-family="Arial" font-weight="700" fill="#1e3a8a">ANIMAL BODY PARTS</text>
+  <g transform="translate(100 90)">
+    <ellipse cx="120" cy="95" rx="95" ry="55" fill="#60a5fa"/><polygon points="205,95 280,55 280,135" fill="#3b82f6"/><polygon points="110,80 155,30 165,90" fill="#bfdbfe"/><circle cx="55" cy="82" r="7" fill="#0f172a"/>
+    <text x="140" y="190" text-anchor="middle" font-family="Arial" font-size="24" fill="#1e3a8a">fish</text>
+  </g>
+  <g transform="translate(420 82)">
+    <ellipse cx="95" cy="110" rx="70" ry="48" fill="#fde68a"/><circle cx="150" cy="75" r="32" fill="#fef3c7"/><polygon points="177,76 216,88 179,99" fill="#fb923c"/><path d="M72 104q-75-52-18-96q50 35 18 96" fill="#f59e0b"/><path d="M80 148l-20 60M118 150l18 58" stroke="#92400e" stroke-width="8"/><text x="110" y="225" text-anchor="middle" font-family="Arial" font-size="24" fill="#92400e">bird</text>
+  </g>
+</svg>

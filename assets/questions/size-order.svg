@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360">
+  <rect width="760" height="360" rx="28" fill="#fff7ed"/>
+  <text x="380" y="42" text-anchor="middle" font-size="28" font-family="Arial" font-weight="700" fill="#9a3412">SMALL TO LARGE</text>
+  <g transform="translate(70 85)" fill="#475569" font-family="Arial" text-anchor="middle">
+    <text x="60" y="115" font-size="48">🐜</text><text x="60" y="170" font-size="22">ant</text>
+    <text x="210" y="110" font-size="70">🐇</text><text x="210" y="170" font-size="22">rabbit</text>
+    <text x="390" y="95" font-size="92">🐐</text><text x="390" y="170" font-size="22">goat</text>
+    <text x="570" y="80" font-size="112">🐎</text><text x="570" y="170" font-size="22">horse</text>
+  </g>
+  <path d="M105 285h540" stroke="#fb923c" stroke-width="8" stroke-linecap="round"/><path d="M630 268l28 17-28 17" fill="#fb923c"/>
+</svg>

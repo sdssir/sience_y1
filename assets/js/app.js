@@ -1,392 +1,311 @@
-(() => {
-  "use strict";
+(function () {
+  'use strict';
 
+  const data = window.QUIZ_DATA;
   const $ = (id) => document.getElementById(id);
+  const screens = {
+    home: $('homeScreen'),
+    quiz: $('quizScreen'),
+    result: $('resultScreen')
+  };
 
   const els = {
-    homeScreen: $("homeScreen"),
-    quizScreen: $("quizScreen"),
-    resultScreen: $("resultScreen"),
-    topicCards: $("topicCards"),
-    studentName: $("studentName"),
-    selectionTitle: $("selectionTitle"),
-    selectionMeta: $("selectionMeta"),
-    bestScoreHome: $("bestScoreHome"),
-    startButton: $("startButton"),
-    headerScore: $("headerScore"),
-    liveScore: $("liveScore"),
-    liveTotal: $("liveTotal"),
-    quitButton: $("quitButton"),
-    topicLabel: $("topicLabel"),
-    questionNumber: $("questionNumber"),
-    questionTotal: $("questionTotal"),
-    miniScore: $("miniScore"),
-    progressBar: $("progressBar"),
-    questionText: $("questionText"),
-    answers: $("answers"),
-    feedback: $("feedback"),
-    feedbackIcon: $("feedbackIcon"),
-    feedbackTitle: $("feedbackTitle"),
-    feedbackAnswer: $("feedbackAnswer"),
-    feedbackExplanation: $("feedbackExplanation"),
-    answerPrompt: $("answerPrompt"),
-    nextButton: $("nextButton"),
-    resultTitle: $("resultTitle"),
-    resultMessage: $("resultMessage"),
-    finalScore: $("finalScore"),
-    finalTotal: $("finalTotal"),
-    finalPercent: $("finalPercent"),
-    bestScoreResult: $("bestScoreResult"),
-    topicBreakdownSection: $("topicBreakdownSection"),
-    topicBreakdown: $("topicBreakdown"),
-    reviewCount: $("reviewCount"),
-    reviewList: $("reviewList"),
-    retryButton: $("retryButton"),
-    homeButton: $("homeButton"),
-    printButton: $("printButton")
+    topScore: $('topScore'), liveScore: $('liveScore'), liveTotal: $('liveTotal'),
+    selectedLevelLabel: $('selectedLevelLabel'), studentName: $('studentName'),
+    levelBadge: $('levelBadge'), topicLabel: $('topicLabel'), questionNumber: $('questionNumber'), questionTotal: $('questionTotal'), progressBar: $('progressBar'),
+    questionText: $('questionText'), questionImageWrap: $('questionImageWrap'), questionImage: $('questionImage'), answers: $('answers'),
+    feedback: $('feedback'), feedbackIcon: $('feedbackIcon'), feedbackTitle: $('feedbackTitle'), answerMark: $('answerMark'), selectedFeedback: $('selectedFeedback'), correctAnswerText: $('correctAnswerText'), feedbackExplanation: $('feedbackExplanation'), answerPrompt: $('answerPrompt'), nextButton: $('nextButton'),
+    finalScore: $('finalScore'), finalPercent: $('finalPercent'), correctCount: $('correctCount'), wrongCount: $('wrongCount'), resultTitle: $('resultTitle'), resultMessage: $('resultMessage'), resultLevel: $('resultLevel'), topicBreakdown: $('topicBreakdown'), reviewCount: $('reviewCount'), reviewList: $('reviewList'), resultAvatar: $('resultAvatar')
   };
 
   const state = {
-    selectedTopic: "all",
-    quiz: [],
+    level: 'MEDIUM',
+    questions: [],
     index: 0,
     score: 0,
     answered: false,
-    responses: [],
-    student: "",
-    lastSelection: "all"
+    answers: [],
+    student: ''
   };
 
-  const topicById = new Map(TOPICS.map((t) => [t.id, t]));
-
   function shuffle(items) {
-    const copy = [...items];
-    for (let i = copy.length - 1; i > 0; i -= 1) {
+    const arr = items.slice();
+    for (let i = arr.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return copy;
+    return arr;
   }
 
-  function getQuestionSet(selection) {
-    const filtered = selection === "all"
-      ? QUESTIONS
-      : QUESTIONS.filter((q) => q.topic === Number(selection));
-    return shuffle(filtered);
+  function showScreen(name) {
+    Object.entries(screens).forEach(([key, el]) => { el.hidden = key !== name; });
+    document.body.classList.toggle('quiz-active', name === 'quiz');
+    els.topScore.hidden = name !== 'quiz';
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
-  function selectionLabel(selection) {
-    if (selection === "all") return "All Topics";
-    const topic = topicById.get(Number(selection));
-    return topic ? `Topic ${topic.id} — ${topic.name}` : "Quiz";
-  }
-
-  function storageKey(selection) {
-    return `scienceYear1Best:${selection}`;
-  }
-
-  function loadBest(selection) {
-    try {
-      const raw = localStorage.getItem(storageKey(selection));
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!Number.isFinite(parsed.score) || !Number.isFinite(parsed.total)) return null;
-      return parsed;
-    } catch {
-      return null;
-    }
-  }
-
-  function saveBest(selection, score, total) {
-    const previous = loadBest(selection);
-    const previousRatio = previous ? previous.score / previous.total : -1;
-    const ratio = total ? score / total : 0;
-    if (!previous || ratio > previousRatio || (ratio === previousRatio && score > previous.score)) {
-      try {
-        localStorage.setItem(storageKey(selection), JSON.stringify({ score, total }));
-      } catch {
-        // Quiz still works if browser storage is unavailable.
-      }
-    }
-  }
-
-  function updateBestDisplay() {
-    const best = loadBest(state.selectedTopic);
-    els.bestScoreHome.textContent = best ? `Best: ${best.score}/${best.total}` : "Best: —";
-  }
-
-  function renderTopicCards() {
-    const allCount = QUESTIONS.length;
-    const cards = [
-      { id: "all", title: "All Topics", subtitle: `Topics 2–7 • ${allCount} questions` },
-      ...TOPICS.map((topic) => {
-        const count = QUESTIONS.filter((q) => q.topic === topic.id).length;
-        return { id: String(topic.id), title: topic.name, subtitle: `Topic ${topic.id} • ${count} questions` };
-      })
-    ];
-
-    els.topicCards.innerHTML = "";
-    cards.forEach((card) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `topic-card${state.selectedTopic === card.id ? " selected" : ""}`;
-      button.dataset.topic = card.id;
-      button.setAttribute("aria-pressed", state.selectedTopic === card.id ? "true" : "false");
-      button.innerHTML = `
-        <span class="topic-number">${card.id === "all" ? "Mixed quiz" : `Topic ${card.id}`}</span>
-        <span class="topic-name">${card.title}</span>
-        <span class="topic-count">${card.subtitle}</span>
-      `;
-      button.addEventListener("click", () => selectTopic(card.id));
-      els.topicCards.appendChild(button);
+  function setLevel(level) {
+    if (!data.levels[level]) return;
+    state.level = level;
+    document.querySelectorAll('.level-card').forEach((card) => {
+      card.classList.toggle('selected', card.dataset.level === level);
     });
-  }
-
-  function selectTopic(id) {
-    state.selectedTopic = id;
-    renderTopicCards();
-    const count = id === "all" ? QUESTIONS.length : QUESTIONS.filter((q) => q.topic === Number(id)).length;
-    els.selectionTitle.textContent = selectionLabel(id);
-    els.selectionMeta.textContent = `${count} questions • ${count} total marks`;
-    updateBestDisplay();
-  }
-
-  function showScreen(screen) {
-    els.homeScreen.hidden = screen !== "home";
-    els.quizScreen.hidden = screen !== "quiz";
-    els.resultScreen.hidden = screen !== "result";
-    els.headerScore.hidden = screen !== "quiz";
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    els.selectedLevelLabel.textContent = `${level} LEVEL`;
   }
 
   function startQuiz() {
     state.student = els.studentName.value.trim();
-    state.lastSelection = state.selectedTopic;
-    state.quiz = getQuestionSet(state.selectedTopic);
+    state.questions = shuffle(data.levels[state.level]);
     state.index = 0;
     state.score = 0;
     state.answered = false;
-    state.responses = [];
-
-    try {
-      localStorage.setItem("scienceYear1Student", state.student);
-    } catch {
-      // Ignore storage failures.
-    }
-
-    els.liveTotal.textContent = state.quiz.length;
-    els.questionTotal.textContent = state.quiz.length;
-    updateLiveScore();
-    showScreen("quiz");
+    state.answers = [];
+    els.liveScore.textContent = '0';
+    els.liveTotal.textContent = String(state.questions.length);
+    els.questionTotal.textContent = String(state.questions.length);
+    showScreen('quiz');
     renderQuestion();
   }
 
-  function updateLiveScore() {
-    els.liveScore.textContent = state.score;
-    els.miniScore.textContent = state.score;
-  }
-
   function renderQuestion() {
+    const question = state.questions[state.index];
     state.answered = false;
-    const q = state.quiz[state.index];
-    const topic = topicById.get(q.topic);
-    const progress = ((state.index) / state.quiz.length) * 100;
 
-    els.topicLabel.textContent = `Topic ${topic.id} — ${topic.name}`;
-    els.questionNumber.textContent = state.index + 1;
-    els.questionText.textContent = q.question;
-    els.progressBar.style.width = `${progress}%`;
-    els.answers.innerHTML = "";
+    els.levelBadge.textContent = state.level;
+    els.levelBadge.classList.toggle('hard', state.level === 'HARD');
+    els.topicLabel.textContent = `Topic ${question.topic} • ${question.topicName}`;
+    els.questionNumber.textContent = String(state.index + 1);
+    els.questionText.textContent = question.question;
+    els.progressBar.style.width = `${(state.index / state.questions.length) * 100}%`;
     els.feedback.hidden = true;
-    els.feedback.className = "feedback";
-    els.nextButton.hidden = true;
-    els.answerPrompt.hidden = false;
-    els.answerPrompt.textContent = "Select an answer to continue.";
+    els.feedback.classList.remove('wrong');
+    els.nextButton.disabled = true;
+    els.nextButton.textContent = state.index === state.questions.length - 1 ? 'See My Score →' : 'Next →';
+    els.answerPrompt.textContent = 'Select A, B, C, or D.';
 
-    const letters = ["A", "B", "C", "D"];
-    q.options.forEach((option, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "answer-button";
-      button.dataset.index = String(index);
-      button.innerHTML = `
-        <span class="answer-letter">${letters[index]}</span>
-        <span class="answer-text"></span>
-        <span class="answer-status" aria-hidden="true"></span>
-      `;
-      button.querySelector(".answer-text").textContent = option;
-      button.addEventListener("click", () => submitAnswer(index));
+    if (question.image) {
+      els.questionImage.src = question.image;
+      els.questionImage.alt = question.imageAlt || 'Question illustration';
+      els.questionImageWrap.hidden = false;
+    } else {
+      els.questionImage.src = '';
+      els.questionImage.alt = '';
+      els.questionImageWrap.hidden = true;
+    }
+
+    els.answers.innerHTML = '';
+    question.choices.forEach((choice, idx) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'answer-btn';
+      button.dataset.index = String(idx);
+      button.innerHTML = `<span class="answer-letter">${String.fromCharCode(65 + idx)}</span><span>${escapeHtml(choice.text)}</span>`;
+      button.addEventListener('click', () => answerQuestion(idx));
       els.answers.appendChild(button);
     });
   }
 
-  function submitAnswer(selectedIndex) {
+  function answerQuestion(choiceIndex) {
     if (state.answered) return;
     state.answered = true;
 
-    const q = state.quiz[state.index];
-    const correct = selectedIndex === q.answer;
-    if (correct) state.score += 1;
-    updateLiveScore();
+    const question = state.questions[state.index];
+    const selected = question.choices[choiceIndex];
+    const correctIndex = question.choices.findIndex((choice) => choice.correct);
+    const correct = question.choices[correctIndex];
+    const isCorrect = Boolean(selected.correct);
 
-    const buttons = [...els.answers.querySelectorAll(".answer-button")];
-    buttons.forEach((button, index) => {
+    if (isCorrect) state.score += 1;
+    els.liveScore.textContent = String(state.score);
+
+    const buttons = Array.from(els.answers.querySelectorAll('.answer-btn'));
+    buttons.forEach((button, idx) => {
       button.disabled = true;
-      const status = button.querySelector(".answer-status");
-      if (index === q.answer) {
-        button.classList.add("correct");
-        status.textContent = "✓";
-      }
-      if (index === selectedIndex && !correct) {
-        button.classList.add("wrong");
-        status.textContent = "×";
-      }
-    });
-
-    state.responses.push({
-      questionId: q.id,
-      topic: q.topic,
-      question: q.question,
-      selectedIndex,
-      selectedText: q.options[selectedIndex],
-      correctIndex: q.answer,
-      correctText: q.options[q.answer],
-      explanation: q.explanation,
-      correct
+      if (idx === correctIndex) button.classList.add('correct');
+      if (idx === choiceIndex && !isCorrect) button.classList.add('wrong');
+      if (idx !== correctIndex && idx !== choiceIndex) button.classList.add('dimmed');
     });
 
     els.feedback.hidden = false;
-    els.feedback.classList.add(correct ? "success" : "error");
-    els.feedbackIcon.src = correct ? "assets/images/correct-smile.png" : "assets/images/wrong-sad.png";
-    els.feedbackIcon.alt = correct ? "Smiling student cartoon avatar" : "Sad student cartoon avatar";
-    els.feedbackTitle.textContent = correct ? "Great job — correct!" : "Not quite.";
-    els.feedbackAnswer.textContent = correct
-      ? `Correct answer: ${q.options[q.answer]}`
-      : `The correct answer is: ${q.options[q.answer]}`;
-    els.feedbackExplanation.textContent = q.explanation;
+    els.feedback.classList.toggle('wrong', !isCorrect);
+    els.feedbackIcon.src = isCorrect ? 'assets/images/correct-happy.png' : 'assets/images/wrong-sad.png';
+    els.feedbackIcon.alt = isCorrect ? 'Happy quiz buddies' : 'Sad quiz buddies';
+    els.feedbackTitle.textContent = isCorrect ? randomCorrectTitle() : randomTryAgainTitle();
+    els.answerMark.textContent = isCorrect ? '+1 MARK' : '+0 MARK';
+    els.selectedFeedback.textContent = selected.feedback;
+    els.correctAnswerText.textContent = correct.text;
+    els.feedbackExplanation.textContent = `Why: ${question.explanation}`;
+    els.answerPrompt.textContent = isCorrect ? 'Great thinking!' : 'Read the explanation, then keep going!';
+    els.nextButton.disabled = false;
 
-    els.answerPrompt.hidden = true;
-    els.nextButton.hidden = false;
-    els.nextButton.textContent = state.index === state.quiz.length - 1 ? "See Total Marks →" : "Next Question →";
+    state.answers.push({
+      id: question.id,
+      topic: question.topic,
+      topicName: question.topicName,
+      question: question.question,
+      selected: selected.text,
+      correct: correct.text,
+      isCorrect,
+      explanation: question.explanation
+    });
+
+    playTone(isCorrect);
+    els.nextButton.focus({ preventScroll: true });
   }
 
   function nextQuestion() {
     if (!state.answered) return;
-    if (state.index >= state.quiz.length - 1) {
-      finishQuiz();
+    if (state.index >= state.questions.length - 1) {
+      showResults();
       return;
     }
     state.index += 1;
     renderQuestion();
   }
 
-  function getResultMessage(percent) {
-    if (percent === 100) return "Perfect score! You answered every question correctly.";
-    if (percent >= 85) return "Excellent work! You have a strong understanding of these science topics.";
-    if (percent >= 70) return "Great job! Review the few questions you missed and try again.";
-    if (percent >= 50) return "Good effort! Review the answers below and have another try.";
-    return "Keep practising. Review the correct answers below, then try the quiz again.";
+  function showResults() {
+    document.body.classList.remove('quiz-active');
+    const total = state.questions.length;
+    const percent = Math.round((state.score / total) * 100);
+    const wrong = total - state.score;
+    const name = state.student ? `${state.student}, ` : '';
+
+    els.finalScore.textContent = String(state.score);
+    els.finalPercent.textContent = `${percent}%`;
+    els.correctCount.textContent = String(state.score);
+    els.wrongCount.textContent = String(wrong);
+    els.resultLevel.textContent = `${state.level} • 40 QUESTIONS`;
+
+    if (percent >= 90) {
+      els.resultTitle.textContent = 'Science Superstar! 🌟';
+      els.resultMessage.textContent = `${name}excellent work. Your science thinking is very strong!`;
+      els.resultAvatar.src = 'assets/images/correct-happy.png';
+    } else if (percent >= 70) {
+      els.resultTitle.textContent = 'Great Work! 🚀';
+      els.resultMessage.textContent = `${name}you did really well. Review a few questions and try to beat your score.`;
+      els.resultAvatar.src = 'assets/images/correct-happy.png';
+    } else if (percent >= 50) {
+      els.resultTitle.textContent = 'Good Effort! 💪';
+      els.resultMessage.textContent = `${name}you are learning. Review the explanations and try again.`;
+      els.resultAvatar.src = 'assets/images/correct-happy.png';
+    } else {
+      els.resultTitle.textContent = 'Keep Going! 🧠';
+      els.resultMessage.textContent = `${name}every question is practice. Review the answers and have another try.`;
+      els.resultAvatar.src = 'assets/images/correct-happy.png';
+    }
+
+    renderBreakdown();
+    renderReview();
+    saveBestScore(percent);
+    showScreen('result');
   }
 
   function renderBreakdown() {
-    const usedTopicIds = [...new Set(state.quiz.map((q) => q.topic))].sort((a, b) => a - b);
-    els.topicBreakdown.innerHTML = "";
-    usedTopicIds.forEach((topicId) => {
-      const topic = topicById.get(topicId);
-      const topicResponses = state.responses.filter((r) => r.topic === topicId);
-      const correct = topicResponses.filter((r) => r.correct).length;
-      const card = document.createElement("div");
-      card.className = "breakdown-card";
-      card.innerHTML = `
-        <span>Topic ${topic.id}</span>
-        <strong>${topic.name}</strong>
-        <div class="breakdown-score">${correct}/${topicResponses.length} marks</div>
-      `;
+    els.topicBreakdown.innerHTML = '';
+    Object.entries(data.topics).forEach(([topic, topicName]) => {
+      const topicAnswers = state.answers.filter((a) => String(a.topic) === topic);
+      if (!topicAnswers.length) return;
+      const got = topicAnswers.filter((a) => a.isCorrect).length;
+      const card = document.createElement('div');
+      card.className = 'topic-score';
+      card.innerHTML = `<span>Topic ${topic}<br>${escapeHtml(topicName)}</span><strong>${got}/${topicAnswers.length}</strong>`;
       els.topicBreakdown.appendChild(card);
     });
-    els.topicBreakdownSection.hidden = usedTopicIds.length <= 1;
   }
 
   function renderReview() {
-    const wrong = state.responses.filter((r) => !r.correct);
-    const list = wrong.length ? wrong : state.responses;
-    els.reviewCount.textContent = wrong.length ? `${wrong.length} to review` : "All correct";
-    els.reviewList.innerHTML = "";
-
-    list.forEach((response) => {
-      const item = document.createElement("article");
-      item.className = `review-item ${response.correct ? "correct-review" : "wrong-review"}`;
-      const topic = topicById.get(response.topic);
-      const selectedLine = response.correct
-        ? `Your answer: ${response.selectedText}`
-        : `Your answer: ${response.selectedText}`;
+    const wrongAnswers = state.answers.filter((a) => !a.isCorrect);
+    els.reviewCount.textContent = `(${wrongAnswers.length})`;
+    els.reviewList.innerHTML = '';
+    if (!wrongAnswers.length) {
+      const item = document.createElement('div');
+      item.className = 'review-item';
+      item.innerHTML = '<strong>Perfect round! 🎉</strong><p>No incorrect answers to review.</p>';
+      els.reviewList.appendChild(item);
+      return;
+    }
+    wrongAnswers.forEach((a, idx) => {
+      const item = document.createElement('article');
+      item.className = 'review-item';
       item.innerHTML = `
-        <strong>Topic ${topic.id}: ${response.question}</strong>
-        <p class="review-answer">${escapeHtml(selectedLine)}</p>
-        ${response.correct ? "" : `<p class="review-answer"><b>Correct answer:</b> ${escapeHtml(response.correctText)}</p>`}
-        <p>${escapeHtml(response.explanation)}</p>
-      `;
+        <strong>${idx + 1}. ${escapeHtml(a.question)}</strong>
+        <p><b>Your answer:</b> ${escapeHtml(a.selected)}</p>
+        <p><b>Correct answer:</b> ${escapeHtml(a.correct)}</p>
+        <p>${escapeHtml(a.explanation)}</p>`;
       els.reviewList.appendChild(item);
     });
   }
 
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function finishQuiz() {
-    const total = state.quiz.length;
-    const percent = total ? Math.round((state.score / total) * 100) : 0;
-    saveBest(state.lastSelection, state.score, total);
-    const best = loadBest(state.lastSelection);
-    const name = state.student || "Scientist";
-
-    els.resultTitle.textContent = `Well done, ${name}!`;
-    els.resultMessage.textContent = getResultMessage(percent);
-    els.finalScore.textContent = state.score;
-    els.finalTotal.textContent = total;
-    els.finalPercent.textContent = `${percent}%`;
-    els.bestScoreResult.textContent = best ? `${best.score}/${best.total}` : `${state.score}/${total}`;
-
-    renderBreakdown();
-    renderReview();
-    els.progressBar.style.width = "100%";
-    showScreen("result");
-  }
-
-  function goHome() {
-    showScreen("home");
-    updateBestDisplay();
-  }
-
-  function retryQuiz() {
-    state.selectedTopic = state.lastSelection;
-    selectTopic(state.selectedTopic);
-    startQuiz();
-  }
-
-  function restoreStudentName() {
+  function saveBestScore(percent) {
     try {
-      const saved = localStorage.getItem("scienceYear1Student");
-      if (saved) els.studentName.value = saved;
-    } catch {
-      // Ignore storage failures.
+      const key = `science-year1-best-${state.level.toLowerCase()}`;
+      const previous = Number(localStorage.getItem(key) || 0);
+      if (percent > previous) localStorage.setItem(key, String(percent));
+    } catch (_) {
+      // The quiz works even if browser storage is blocked.
     }
   }
 
-  els.startButton.addEventListener("click", startQuiz);
-  els.nextButton.addEventListener("click", nextQuestion);
-  els.quitButton.addEventListener("click", goHome);
-  els.homeButton.addEventListener("click", goHome);
-  els.retryButton.addEventListener("click", retryQuiz);
-  els.printButton.addEventListener("click", () => window.print());
+  function randomCorrectTitle() {
+    const titles = ['Correct! 🎉', 'Brilliant! ⭐', 'Nice Thinking! 🚀', 'You Got It! 🥳', 'Science Power! 🔬'];
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
 
-  restoreStudentName();
-  renderTopicCards();
-  selectTopic("all");
+  function randomTryAgainTitle() {
+    const titles = ['Almost! 🌱', 'Good Try! 💡', 'Keep Thinking! 🧠', 'Not This One — Yet! 🚀'];
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
+
+  function playTone(isCorrect) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isCorrect ? 660 : 220, ctx.currentTime);
+      if (isCorrect) osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+      osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.2);
+      setTimeout(() => ctx.close(), 300);
+    } catch (_) {
+      // Sound is optional.
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
+  }
+
+  function goHome() {
+    showScreen('home');
+  }
+
+  document.querySelectorAll('.level-card').forEach((card) => card.addEventListener('click', () => setLevel(card.dataset.level)));
+  $('startButton').addEventListener('click', startQuiz);
+  $('nextButton').addEventListener('click', nextQuestion);
+  $('quitButton').addEventListener('click', goHome);
+  $('brandHome').addEventListener('click', goHome);
+  $('retryButton').addEventListener('click', startQuiz);
+  $('changeLevelButton').addEventListener('click', goHome);
+  $('printButton').addEventListener('click', () => window.print());
+
+  document.addEventListener('keydown', (event) => {
+    if (screens.quiz.hidden) return;
+    if (event.target && /input|textarea|select/i.test(event.target.tagName)) return;
+    const map = { '1': 0, '2': 1, '3': 2, '4': 3, 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+    const key = event.key.toLowerCase();
+    if (!state.answered && Object.prototype.hasOwnProperty.call(map, key)) {
+      const btn = els.answers.querySelector(`[data-index="${map[key]}"]`);
+      if (btn) { event.preventDefault(); btn.click(); }
+    } else if (state.answered && (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowRight')) {
+      event.preventDefault(); nextQuestion();
+    }
+  });
+
+  setLevel('MEDIUM');
+  showScreen('home');
 })();

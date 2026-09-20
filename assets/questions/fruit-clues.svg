@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360">
+  <rect width="760" height="360" rx="28" fill="#fefce8"/>
+  <text x="380" y="42" text-anchor="middle" font-size="28" font-family="Arial" font-weight="700" fill="#854d0e">FRUIT CLUES</text>
+  <g font-family="Arial" text-anchor="middle">
+    <g transform="translate(120 88)"><circle cx="70" cy="60" r="45" fill="#a16207"/><text x="70" y="130" font-size="24" fill="#713f12">Ciku</text><text x="70" y="164" font-size="20" fill="#713f12">sweet • oval</text></g>
+    <g transform="translate(280 88)"><circle cx="70" cy="60" r="45" fill="#ef4444"/><path d="M70 15q15-25 35-20" stroke="#16a34a" stroke-width="8" fill="none"/><text x="70" y="130" font-size="24" fill="#713f12">Apple</text><text x="70" y="164" font-size="20" fill="#713f12">sweet • round</text></g>
+    <g transform="translate(440 88)"><circle cx="70" cy="60" r="45" fill="#fb923c"/><text x="70" y="130" font-size="24" fill="#713f12">Orange</text><text x="70" y="164" font-size="20" fill="#713f12">sour • round</text></g>
+    <g transform="translate(600 88)"><ellipse cx="55" cy="60" rx="32" ry="49" fill="#84cc16"/><text x="55" y="130" font-size="24" fill="#713f12">Kedondong</text><text x="55" y="164" font-size="20" fill="#713f12">sour • oval</text></g>
+  </g>
+</svg>

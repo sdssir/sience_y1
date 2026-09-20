@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360">
+  <rect width="760" height="360" rx="28" fill="#fdf2f8"/>
+  <text x="380" y="40" text-anchor="middle" font-size="28" font-family="Arial" font-weight="700" fill="#831843">COMPARE THE PLANTS</text>
+  <g transform="translate(110 75)">
+    <text x="120" y="0" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#9f1239">Rose</text>
+    <line x1="120" y1="55" x2="120" y2="195" stroke="#166534" stroke-width="11"/>
+    <ellipse cx="75" cy="90" rx="45" ry="20" fill="#4ade80" transform="rotate(-25 75 90)"/><path d="M50 90q25-18 50 0M75 72v36" stroke="#166534" stroke-width="3" fill="none"/>
+    <circle cx="120" cy="45" r="34" fill="#fb7185"/>
+    <path d="M120 195c-12 20-34 36-48 62m48-62c12 20 34 36 48 62m-48-62v70" stroke="#a16207" stroke-width="8" fill="none"/>
+    <text x="120" y="295" text-anchor="middle" font-family="Arial" font-size="20" fill="#831843">netted veins • taproot</text>
+  </g>
+  <g transform="translate(430 75)">
+    <text x="105" y="0" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#9f1239">Pandan</text>
+    <g fill="#4ade80"><path d="M105 205Q55 120 60 32Q108 120 105 205Z"/><path d="M105 205Q105 105 110 25Q137 110 105 205Z"/><path d="M105 205Q160 120 165 42Q135 120 105 205Z"/></g>
+    <g stroke="#166534" stroke-width="3"><line x1="80" y1="170" x2="65" y2="68"/><line x1="109" y1="170" x2="111" y2="56"/><line x1="132" y1="170" x2="158" y2="78"/></g>
+    <g stroke="#a16207" stroke-width="6" fill="none"><path d="M105 202q-55 30-58 66"/><path d="M105 202q-24 50-20 75"/><path d="M105 202q28 45 28 72"/><path d="M105 202q60 25 64 62"/></g>
+    <text x="105" y="295" text-anchor="middle" font-family="Arial" font-size="20" fill="#831843">parallel veins • fibrous roots</text>
+  </g>
+</svg>
